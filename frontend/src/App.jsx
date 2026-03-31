@@ -4,7 +4,8 @@ import ImageUpload from './components/ImageUpload'
 import ResultsGrid from './components/ResultsGrid'
 import LoadingSpinner from './components/LoadingSpinner'
 
-const API_URL = '/search'
+const API_BASE_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/$/, '') : ''
+const API_URL = `${API_BASE_URL}/search`
 
 function App() {
   const [selectedFile, setSelectedFile] = useState(null)
@@ -45,7 +46,14 @@ function App() {
         timeout: 30000,
       })
 
-      setResults(response.data.results)
+      const processedResults = response.data.results.map(item => ({
+        ...item,
+        image_url: item.image_url.startsWith('http') 
+          ? item.image_url 
+          : `${API_BASE_URL}${item.image_url}`
+      }))
+
+      setResults(processedResults)
 
       // Scroll to results after a short delay
       setTimeout(() => {
